@@ -44,46 +44,45 @@
           <header>
               <h1>Playlist</h1>
           </header>
-          <section>
+          <section id="audio">
               <div id="seeker"></div>
-              <audio>
-                  <source src="music/Beethoven_Symphony_5.ogg" type="audio/ogg">
-                  Your browser does not support this format of audio !
-              </audio>
           </section>
           <aside>
               <div id="controls">
                   <button id="previous">Previous</button>
-                  <button id="play">Play/Pause</button>
+                  <button id="play">Play</button>
+                  <button id="stop">Stop</button>
                   <button id="next">Next</button>
+                  <input type="checkbox" id="shuffle" /><label id="shufflelabel"  for="shuffle">Turn Shuffle On</label>
+                  <input type="checkbox" id="repeat" /><label id="repeatlabel"  for="repeat">Turn Repeat On</label>
               </div>
           </aside>
           <section>
               <div id="playlist">
                   <ul id="playlistHead">
                       <li>Album</li>
-                      <li>Artist</li>
                       <li>Track</li>
-                      <li>Title</li>
-                  </ul>
-                  <ul class="playlistItem">
-                      <li>Album 1</li>
-                      <li>Artist 1</li>
-                      <li>Track 1</li>
-                      <li>Title 1</li>
+                      <li>Artist</li>
                   </ul>
               </div>
+              <button id="clearPlaylistButton">Clear Playlist</button>
           </section>
       </article>
       <aside id="library">
           <header>
               <h1>Library</h1>
           </header>
+          <div id="albums">
+
+          </div>
       </aside>
       <div class="clearfix"></div>
   </div>
   <footer>
-      <small>Made from <a href="http://html5boilerplate.com/">HTML5 Boilerplate</a></small>
+      <small>Made with <a href="http://html5boilerplate.com/">HTML5 Boilerplate</a>,
+          <a href="http://www.jetbrains.com/webstorm/">WebStorm</a>,
+          <a href="http://jquery.com/">jQuery</a>,
+          <a href="http://jqueryui.com/">jQuery UI</a> etc.</small>
   </footer>
 
 
@@ -93,8 +92,8 @@
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
   <script>window.jQuery || document.write('<script src="js/libs/jquery-1.7.1.min.js"><\/script>')</script>
 
-  <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.js"></script>
-  <script>window.jQuery.ui || document.write('<script src="js/libs/jquery-ui-1.8.16.min"><\/script>')</script>
+  <script src="js/libs/jquery-ui-1.8.18.min.js"></script>
+  <script src="js/libs/jquery.tmpl.min.js"></script>
 
   <!-- scripts concatenated and minified via build script -->
   <script src="js/plugins.js"></script>
@@ -109,5 +108,44 @@
     g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
     s.parentNode.insertBefore(g,s)}(document,'script'));
   </script>
+
+  <script id="audioTemplate" type="text/x-jquery-tmpl">
+      <audio>
+          <source src="${trackLocation}.ogg" type="audio/ogg">
+          <source src="${trackLocation}.mp3" type="audio/mp3">
+          Your browser does not support this format of audio !
+      </audio>
+  </script>
+
+  <script id="albumTemplate" type="text/x-jquery-tmpl">
+      <section>
+          <header class="albumHeader">
+              <h4 class="albumTitle" data-album-id="${albumId}">${albumTitle}</h4>
+              <button class="addAlbumButton">Add to Playlist</button>
+              <div class="clearfix"></div>
+          </header>
+          <section class="songs">
+              <ul>
+                  {{each tracks}}
+                  {{tmpl($value) "albumListingTemplate"}}
+                  {{/each}}
+              </ul>
+          </section>
+      </section>
+  </script>
+
+  <script id="albumListingTemplate" type="text/x-jquery-tmpl">
+      <li data-track-id="${trackId}" data-track-location="${trackLocation}">${trackTitle} - ${artist}</li>
+  </script>
+
+  <script id="playlistitemtemplate" type="text/x-jquery-tmpl">
+      <ul class="playlistItem" data-album-id="${albumId}"
+          data-track-id="${trackId}" data-track-location="${trackLocation}">
+          <li>${albumTitle}</li>
+          <li>${trackTitle}</li>
+          <li>${artist}</li>
+      </ul>
+  </script>
+
 </body>
 </html>

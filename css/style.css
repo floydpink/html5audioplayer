@@ -223,12 +223,21 @@ div[role='main']{
     margin: 0 auto;
     width: 800px;
     box-shadow: 0  0 10px 5px rgba(0, 0, 0, 0.3);
+    text-shadow: #ccc 1px 1px 3px;
     padding: 10px;
+}
+
+article{
+    padding:0 5px;
 }
 
 #player{
     float:left;
-    width:40%;
+    width:37%;
+}
+
+.ui-widget{
+    font-size: 0.8em;
 }
 
 #seeker{
@@ -237,9 +246,8 @@ div[role='main']{
     height: 0.5em;
 }
 
-#seeker .ui-slider-handle{
-    width: 0.9em;
-    height: 0.9em;
+.ui-slider-horizontal .ui-slider-handle{
+    top: -0.5em;
 }
 
 #controls{
@@ -249,11 +257,11 @@ div[role='main']{
 
 #playlist{
     margin:1px auto;
-    border: #999 solid 1px;
+    border: #708090 solid 1px;
     border-radius: 5px;
     overflow: auto;
     min-height: 200px;
-    max-height: 300px;
+    max-height: 400px;
 }
 
 #playlist ul{
@@ -261,7 +269,7 @@ div[role='main']{
     margin: 0 auto 0 3px;
     padding: 0;
     display: inline-block;
-    width:456px;
+    width:600px;
 }
 
 #playlist li{
@@ -269,7 +277,7 @@ div[role='main']{
     list-style: none;
     padding: 2px 3px;
     margin: 1px;
-    width: 23%;
+    width: 32%;
 }
 
 #playlistHead li{
@@ -282,16 +290,52 @@ div[role='main']{
 
 .playlistItem:hover{
     background-color: #999;
-    color: #ffffaa;
+    color: #ffffff;
+    text-shadow: #777 1px 1px 3px;
     cursor: pointer;
+    box-shadow: #99a 0 0 6px 3px;
+}
+
+#clearPlaylistButton{
+    float: right;
+    margin-top: 10px;
+    margin-right: 2px;
+    font-size: 0.8em;
 }
 
 #library{
     float:left;
-    width:60%;
+    width: 60%;
+    margin-left: 10px;
+}
+
+#albums{
+    overflow: auto;
+    max-height: 500px;
+}
+
+.albumHeader{
+    border-bottom: 1px dotted rgba(3, 3, 15, 0.77);
+}
+
+.albumTitle{
+    float: left;
+}
+
+.addAlbumButton{
+    float: right;
+    margin-top: 20px;
+    margin-right: 90px;
+    font-size: 0.8em;
+}
+
+.songs ul {
+    list-style: none;
 }
 
 footer{
+    color: #999;
+    text-shadow: #bbb 1px 1px 5px;
     margin-top: 30px;
     text-align: center;
 }
