@@ -21,6 +21,7 @@
   <!-- Place favicon.ico and apple-touch-icon.png in the root directory: mathiasbynens.be/notes/touch-icons -->
   <link rel="shortcut icon" href="favicon.ico" />
 
+  <link rel="stylesheet" href="css/jquery-ui.css">
   <link rel="stylesheet" href="css/style.css">
 
   <!-- More ideas for your <head> here: h5bp.com/d/head-Tips -->
@@ -35,11 +36,11 @@
        chromium.org/developers/how-tos/chrome-frame-getting-started -->
   <!--[if lt IE 7]><p class=chromeframe>Your browser is <em>ancient!</em> <a href="http://browsehappy.com/">Upgrade to a different browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a> to experience this site.</p><![endif]-->
   <header>
-      <h1>My Tunes music player</h1>
-      <p>With some selected tunes</p>
+      &#160;
   </header>
-  <div role="main">
-      <article>
+  <div id="content" role="main">
+      <div class="clearfix"></div>
+      <article id="player">
           <header>
               <h1>Playlist</h1>
           </header>
@@ -51,36 +52,35 @@
               </audio>
           </section>
           <aside>
-              <button id="previous">Previous</button>
-              <button id="play">Play/Pause</button>
-              <button id="next">Next</button>
+              <div id="controls">
+                  <button id="previous">Previous</button>
+                  <button id="play">Play/Pause</button>
+                  <button id="next">Next</button>
+              </div>
           </aside>
           <section>
-              <table>
-                  <thead>
-                    <tr>
-                        <th>Track</th>
-                        <th>Title</th>
-                        <th>Album</th>
-                        <th>Artist</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                        <th>Track 1</th>
-                        <th>Title 1</th>
-                        <th>Album 1</th>
-                        <th>Artist 1</th>
-                    </tr>
-                  </tbody>
-              </table>
+              <div id="playlist">
+                  <ul id="playlistHead">
+                      <li>Album</li>
+                      <li>Artist</li>
+                      <li>Track</li>
+                      <li>Title</li>
+                  </ul>
+                  <ul class="playlistItem">
+                      <li>Album 1</li>
+                      <li>Artist 1</li>
+                      <li>Track 1</li>
+                      <li>Title 1</li>
+                  </ul>
+              </div>
           </section>
       </article>
-      <aside>
+      <aside id="library">
           <header>
               <h1>Library</h1>
           </header>
       </aside>
+      <div class="clearfix"></div>
   </div>
   <footer>
       <small>Made from <a href="http://html5boilerplate.com/">HTML5 Boilerplate</a></small>

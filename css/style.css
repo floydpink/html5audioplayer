@@ -218,7 +218,83 @@ td { vertical-align: top; }
    Author:
    ========================================================================== */
 
-@import url('/css/jquery-ui.css');
+div[role='main']{
+    clear: both;
+    margin: 0 auto;
+    width: 800px;
+    box-shadow: 0  0 10px 5px rgba(0, 0, 0, 0.3);
+    padding: 10px;
+}
+
+#player{
+    float:left;
+    width:40%;
+}
+
+#seeker{
+    margin:0 auto;
+    width: 90%;
+    height: 0.5em;
+}
+
+#seeker .ui-slider-handle{
+    width: 0.9em;
+    height: 0.9em;
+}
+
+#controls{
+    margin: 5px auto;
+    text-align: center;
+}
+
+#playlist{
+    margin:1px auto;
+    border: #999 solid 1px;
+    border-radius: 5px;
+    overflow: auto;
+    min-height: 200px;
+    max-height: 300px;
+}
+
+#playlist ul{
+    float: left;
+    margin: 0 auto 0 3px;
+    padding: 0;
+    display: inline-block;
+    width:456px;
+}
+
+#playlist li{
+    float: left;
+    list-style: none;
+    padding: 2px 3px;
+    margin: 1px;
+    width: 23%;
+}
+
+#playlistHead li{
+    background-color: rgba(38, 16, 34, 0.22);
+}
+
+.playlistItem li{
+    background-color: rgba(181, 172, 148, 0.20);
+}
+
+.playlistItem:hover{
+    background-color: #999;
+    color: #ffffaa;
+    cursor: pointer;
+}
+
+#library{
+    float:left;
+    width:60%;
+}
+
+footer{
+    margin-top: 30px;
+    text-align: center;
+}
 
 
 

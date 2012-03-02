@@ -3,26 +3,26 @@
  */
 var musicPlayer = (function ($) {
     return {
-        mockedModel:{
+        library:{
             albums:[
                 {
-                    albumId:1001,
+                    albumId:101,
                     albumTitle:"Symphonies",
                     tracks:[
                         {
-                            trackId:101,
+                            trackId:10101,
                             trackTitle:"Symphony 05",
                             artist:"Beethoven",
                             trackLocation:"music/Beethoven_Symphony_5.ogg"
                         },
                         {
-                            trackId:102,
+                            trackId:10102,
                             trackTitle:"Symphony 07",
                             artist:"Beethoven",
                             trackLocation:"music/Beethoven_Symphony_7.ogg"
                         },
                         {
-                            trackId:103,
+                            trackId:10103,
                             trackTitle:"Symphony 40",
                             artist:"Mozart",
                             trackLocation:"music/Mozart_Symphony_40.ogg"
@@ -30,17 +30,17 @@ var musicPlayer = (function ($) {
                     ]
                 },
                 {
-                    albumId:1002,
+                    albumId:102,
                     albumTitle:"Concertos",
                     tracks:[
                         {
-                            trackId:201,
+                            trackId:10201,
                             trackTitle:"Concerto 01",
                             artist:"Bach",
                             trackLocation:"music/Bach_Concerto_1.ogg"
                         },
                         {
-                            trackId:202,
+                            trackId:10202,
                             trackTitle:"Concerto 04",
                             artist:"Brandenburg",
                             trackLocation:"music/Brandenburg_Concerto_4.ogg"
