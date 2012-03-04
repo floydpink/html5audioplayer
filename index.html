@@ -22,6 +22,7 @@
   <link rel="shortcut icon" href="favicon.ico" />
 
   <link rel="stylesheet" href="css/jquery-ui.css">
+  <link rel="stylesheet" href="css/jquery.alerts.css">
   <link rel="stylesheet" href="css/style.css">
 
   <!-- More ideas for your <head> here: h5bp.com/d/head-Tips -->
@@ -47,6 +48,12 @@
           <section id="audio">
               <div id="seeker"></div>
           </section>
+          <div class="myMarquee">
+          	<div id="songScroller" class="scroller">
+          		<div>No track playing.</div>
+          		<div>No track playing.</div>
+          	</div>
+          </div>
           <aside>
               <div id="controls">
                   <button id="previous">Previous</button>
@@ -54,16 +61,17 @@
                   <button id="stop">Stop</button>
                   <button id="next">Next</button>
                   <input type="checkbox" id="shuffle" /><label id="shufflelabel"  for="shuffle">Turn Shuffle On</label>
-                  <input type="checkbox" id="repeat" /><label id="repeatlabel"  for="repeat">Turn Repeat On</label>
+                  <input type="checkbox" id="repeat" checked="checked" /><label id="repeatlabel"  for="repeat">Turn Repeat Off</label>
               </div>
           </aside>
           <section>
               <div id="playlist">
                   <ul id="playlistHead">
-                      <li>Album</li>
                       <li>Track</li>
+                      <li>Album</li>
                       <li>Artist</li>
                   </ul>
+                  <!-- templated playlist items would follow -->
               </div>
               <button id="clearPlaylistButton">Clear Playlist</button>
           </section>
@@ -73,7 +81,7 @@
               <h1>Library</h1>
           </header>
           <div id="albums">
-
+              <!-- templated albums would follow -->
           </div>
       </aside>
       <div class="clearfix"></div>
@@ -82,18 +90,21 @@
       <small>Made with <a href="http://html5boilerplate.com/">HTML5 Boilerplate</a>,
           <a href="http://www.jetbrains.com/webstorm/">WebStorm</a>,
           <a href="http://jquery.com/">jQuery</a>,
-          <a href="http://jqueryui.com/">jQuery UI</a> etc.</small>
+          <a href="http://jqueryui.com/">jQuery UI</a>,
+          <a href="http://api.jquery.com/category/plugins/templates/">jQuery Templates plugin</a>,
+          <a href="http://www.abeautifulsite.net/blog/2008/12/jquery-alert-dialogs/">jQuery Alert Dialogs plugin</a> etc.</small>
   </footer>
 
 
   <!-- JavaScript at the bottom for fast page loading -->
 
   <!-- Grab Google CDN's jQuery, with a protocol relative URL; fall back to local if offline -->
-  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+  <!--<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>-->
   <script>window.jQuery || document.write('<script src="js/libs/jquery-1.7.1.min.js"><\/script>')</script>
 
   <script src="js/libs/jquery-ui-1.8.18.min.js"></script>
   <script src="js/libs/jquery.tmpl.min.js"></script>
+  <script src="js/libs/jquery.alerts.js"></script>
 
   <!-- scripts concatenated and minified via build script -->
   <script src="js/plugins.js"></script>
@@ -139,11 +150,12 @@
   </script>
 
   <script id="playlistitemtemplate" type="text/x-jquery-tmpl">
-      <ul class="playlistItem" data-album-id="${albumId}"
-          data-track-id="${trackId}" data-track-location="${trackLocation}">
-          <li>${albumTitle}</li>
-          <li>${trackTitle}</li>
-          <li>${artist}</li>
+      <ul class="playlistItem" title="Double click to start playing"
+          data-album-id="${albumId}" data-track-id="${trackId}"
+          data-track-location="${trackLocation}">
+          <li class="trackTitle">${trackTitle}</li>
+          <li class="albumTitle">${albumTitle}</li>
+          <li class="artist">${artist}</li>
       </ul>
   </script>
 
