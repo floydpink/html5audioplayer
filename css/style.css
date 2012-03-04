@@ -335,6 +335,16 @@ noindex:-o-prefocus, #controls label{
     );
 }
 
+.selected{
+    background-color: #699963;
+    cursor: pointer;
+    box-shadow: #99a 0 0 6px 3px;
+    color: #ffffff;
+    text-shadow: #6f6 1px 1px 3px;
+    background-image: -webkit-gradient(linear, 0% 0%, 0% 95%, from(rgba(255, 255, 255, 0.7)), to(rgba(255, 255, 255, 0)));
+    background-image: -moz-linear-gradient(-90deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0));
+}
+
 #clearPlaylistButton{
     float: right;
     margin-top: 10px;

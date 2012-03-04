@@ -52,6 +52,12 @@ var mockData = {
 
 var musicPlayer = (function ($) {
     return {
+        showMessage:function (message, title) {
+            jAlert(message, title);
+        },
+        askQuestion:function (message, title, returnAction) {
+            jConfirm(message, title, returnAction);
+        },
         getLibrary:function () {
             return mockData.library;
         },
@@ -59,13 +65,9 @@ var musicPlayer = (function ($) {
             albumExists:'Album is already in the playlist.',
             albumExistsTitle:'We have it!',
             confirmClearPlaylist:'Music would stop and playlist would clear. Continue?',
-            confirmClearPlaylistTitle:'Well...?'
-        },
-        showMessage:function (message, title) {
-            jAlert(message, title);
-        },
-        askQuestion:function (message, title, returnAction) {
-            jConfirm(message, title, returnAction);
+            confirmClearPlaylistTitle:'Well...?',
+            noTrackSelected:'Click on a track and hit play. Or double click on a track to play it.',
+            noTrackSelectedTitle:'What would I play!?.'
         },
         previousButton:$("#previous"),
         playButton:$("#play"),
@@ -74,6 +76,8 @@ var musicPlayer = (function ($) {
         shuffleButton:$("#shuffle"),
         repeatButton:$("#repeat"),
         nowPlayingClass:'nowPlaying',
+        selectedClass:'selected',
+        pausedClass:'paused',
         getAudioComponent:function () {
             if ($('#audio').find('audio').length > 0) {
                 return $('#audio').find('audio').get(0);
@@ -94,6 +98,7 @@ var musicPlayer = (function ($) {
                 }
             }).click(function () {
                     var options;
+                    var playPauseSwitched;
                     if ($(this).text() === "Play") {
                         options = {
                             label:"Pause",
@@ -101,6 +106,7 @@ var musicPlayer = (function ($) {
                                 primary:"ui-icon-pause"
                             }
                         };
+                        playPauseSwitched = musicPlayer.playSelectedOrResumePaused();
                     } else {
                         options = {
                             label:"Play",
@@ -108,8 +114,12 @@ var musicPlayer = (function ($) {
                                 primary:"ui-icon-play"
                             }
                         };
+                        musicPlayer.pauseCurrentTrack();
+                        playPauseSwitched = true;
                     }
-                    $(this).button("option", options);
+                    if (playPauseSwitched) {
+                        $(this).button("option", options);
+                    }
                 });
             musicPlayer.stopButton.button({
                 text:false,
@@ -123,9 +133,7 @@ var musicPlayer = (function ($) {
                             primary:"ui-icon-play"
                         }
                     });
-                    musicPlayer.removeAudio();
-                    musicPlayer.setSongScroller('No track playing.');
-                    $('.playlistItem').removeClass(musicPlayer.nowPlayingClass);
+                    musicPlayer.stop();
                 });
             musicPlayer.nextButton.button({
                 text:false,
@@ -174,7 +182,8 @@ var musicPlayer = (function ($) {
         wireUpPageEvents:function () {
             $('#clearPlaylistButton').click(musicPlayer.clearPlaylist);
             $('.addAlbumButton').live('click', musicPlayer.addAlbumButtonClick);
-            $('ul.playlistItem').live('dblclick', musicPlayer.startPlayingSelectedTrack);
+            $('ul.playlistItem').live('click', musicPlayer.trackClick);
+            $('ul.playlistItem').live('dblclick', musicPlayer.trackDoubleClick);
         },
         compilejQueryTemplates:function () {
             //compile jQuery templates
@@ -236,11 +245,11 @@ var musicPlayer = (function ($) {
                 musicPlayer.showMessage(musicPlayer.literals.albumExists, musicPlayer.literals.albumExistsTitle);
             }
         },
-        addAudio:function (track) {
+        addAndPlayAudio:function (track) {
             $('#audio').append($.tmpl("audioTemplate", track));
             musicPlayer.getAudioComponent().play();
         },
-        removeAudio:function () {
+        stopAndRemoveAudio:function () {
             if (musicPlayer.getAudioComponent()) {
                 musicPlayer.getAudioComponent().pause();
                 $('#audio').find('audio').remove();
@@ -259,17 +268,55 @@ var musicPlayer = (function ($) {
                 trackLocation:playlistItem.data('trackLocation')
             }
         },
-        play:function (track) {
-            musicPlayer.stopButton.click();
-            var playlistItem = $('.playlistItem[data-track-id=' + track.trackId + ']');
-            playlistItem.addClass(musicPlayer.nowPlayingClass);
+        setScrollerAndGetTrack:function (playlistItem) {
+            var track = musicPlayer.getTrackFromPlayListItem(playlistItem);
             musicPlayer.setSongScroller(track.artist + " - " + track.trackTitle);
-            musicPlayer.addAudio(track);
+            return track;
         },
-        startPlayingSelectedTrack:function (e) {
-            var self = $(this),
-                track = musicPlayer.getTrackFromPlayListItem(self);
-            musicPlayer.play(track);
+        playSelectedOrResumePaused:function () {
+            var pausedTrack = $('.' + musicPlayer.pausedClass);
+            if (pausedTrack.length > 0) {
+                var track = musicPlayer.setScrollerAndGetTrack(pausedTrack);
+                musicPlayer.getAudioComponent().play();
+                return true;
+            } else {
+                var selectedTrack = $('.' + musicPlayer.selectedClass);
+                if (selectedTrack.length > 0) {
+                    musicPlayer.play(selectedTrack);
+                    return true;
+                } else {
+                    musicPlayer.showMessage(musicPlayer.literals.noTrackSelected,
+                        musicPlayer.literals.noTrackSelectedTitle);
+                    return false;
+                }
+            }
+        },
+        pauseCurrentTrack:function () {
+            musicPlayer.getAudioComponent().pause();
+            $('.' + musicPlayer.nowPlayingClass).addClass(musicPlayer.pausedClass);
+            musicPlayer.setSongScroller(' - PAUSED -');
+        },
+        stop:function () {
+            musicPlayer.stopAndRemoveAudio();
+            musicPlayer.setSongScroller('No track playing.');
+            $('.playlistItem').removeClass(musicPlayer.nowPlayingClass);
+        },
+        play:function (playlistItem) {
+            playlistItem.addClass(musicPlayer.nowPlayingClass);
+            var track = musicPlayer.setScrollerAndGetTrack(playlistItem);
+            musicPlayer.addAndPlayAudio(track);
+        },
+        setSelectedTrack:function (playlistItem) {
+            playlistItem.addClass(musicPlayer.selectedClass);
+        },
+        trackClick:function(e){
+            $('.playlistItem').removeClass(musicPlayer.selectedClass);
+            musicPlayer.setSelectedTrack($(this));
+        },
+        trackDoubleClick:function (e) {
+            musicPlayer.stopButton.click();
+            musicPlayer.setSelectedTrack($(this));
+            musicPlayer.playButton.click();
             e.preventDefault();
             e.stopPropagation();
         },
