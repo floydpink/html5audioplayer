@@ -243,12 +243,22 @@ article{
 
 #audio {
     display: none;
+    text-align: center;
+}
+
+#audio > div {
+    display: inline-block;
 }
 
 #seeker{
     margin:0 auto;
-    width: 90%;
+    width: 240px;
     height: 0.5em;
+}
+
+#remainingTime {
+    font-size: smaller;
+    margin: 0 3px;
 }
 
 .ui-slider-horizontal .ui-slider-handle{

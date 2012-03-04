@@ -247,6 +247,7 @@ var musicPlayer = (function ($) {
         },
         addAndPlayAudio:function (track) {
             $('#audio').append($.tmpl("audioTemplate", track));
+            musicPlayer.setupSlider();
             musicPlayer.getAudioComponent().play();
         },
         stopAndRemoveAudio:function () {
@@ -277,6 +278,7 @@ var musicPlayer = (function ($) {
             var pausedTrack = $('.' + musicPlayer.pausedClass);
             if (pausedTrack.length > 0) {
                 var track = musicPlayer.setScrollerAndGetTrack(pausedTrack);
+                pausedTrack.removeClass(musicPlayer.pausedClass);
                 musicPlayer.getAudioComponent().play();
                 return true;
             } else {
@@ -309,7 +311,7 @@ var musicPlayer = (function ($) {
         setSelectedTrack:function (playlistItem) {
             playlistItem.addClass(musicPlayer.selectedClass);
         },
-        trackClick:function(e){
+        trackClick:function (e) {
             $('.playlistItem').removeClass(musicPlayer.selectedClass);
             musicPlayer.setSelectedTrack($(this));
         },
@@ -319,6 +321,44 @@ var musicPlayer = (function ($) {
             musicPlayer.playButton.click();
             e.preventDefault();
             e.stopPropagation();
+        },
+        setupSlider:function () {
+            // http://neutroncreations.com/blog/building-a-custom-html5-audio-player-with-jquery/
+            var audio = musicPlayer.getAudioComponent(),
+                timeleft = $('#remainingTime'),
+                positionIndicator = $('#seeker #handle'),
+                manualSeek, loaded;
+
+            $(audio).bind('timeupdate', function () {
+                var remaining = parseInt(audio.duration - audio.currentTime, 10),
+                    position = (audio.currentTime / audio.duration) * 100,
+                    minutes = Math.floor(remaining / 60, 10),
+                    seconds = remaining - minutes * 60;
+                timeleft.text('-' + minutes + ':' + (seconds > 9 ? seconds : '0' + seconds));
+                if (!manualSeek) {
+                    positionIndicator.css({left:position + '%'});
+                }
+                if (!loaded) {
+                    loaded = true;
+
+                    $('#seeker').slider({
+                        value:0,
+                        step:0.01,
+                        orientation:"horizontal",
+                        range:"min",
+                        max:audio.duration,
+                        animate:true,
+                        slide:function () {
+                            manualSeek = true;
+                        },
+                        stop:function (e, ui) {
+                            manualSeek = false;
+                            audio.currentTime = ui.value;
+                        }
+                    });
+                }
+
+            });
         },
         initializePage:function () {
             //don't show the seeker, if ogg/mp3 is not supported
@@ -337,6 +377,7 @@ var musicPlayer = (function ($) {
             });
 
             musicPlayer.wireUpPageEvents();
+
         }
     };
 }(jQuery));
