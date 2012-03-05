@@ -46,10 +46,11 @@
               <h1>Playlist</h1>
           </header>
           <section id="audio">
+              <div id="currentTime"></div>
               <div id="seeker">
-                  <span id="handle" class="ui-slider-handle" />
+                  <span id="handle" class="ui-slider-handle" title="Drag to seek"></span>
               </div>
-              <div id="remainingTime">5.0</div>
+              <div id="remainingTime"></div>
           </section>
           <div class="myMarquee">
           	<div id="songScroller" class="scroller">
@@ -67,7 +68,7 @@
                   <input type="checkbox" id="repeat" checked="checked" /><label id="repeatlabel"  for="repeat">Turn Repeat Off</label>
               </div>
           </aside>
-          <section>
+          <section id="playlistSection">
               <div id="playlist">
                   <ul id="playlistHead">
                       <li>Track</li>
@@ -88,14 +89,18 @@
           </div>
       </aside>
       <div class="clearfix"></div>
+      <aside id="unsupportedBrowser">
+          Your browser does not support the HTML5 audio tag or the audio formats used in this page.
+      </aside>
   </div>
   <footer>
       <small>Made with <a href="http://html5boilerplate.com/">HTML5 Boilerplate</a>,
           <a href="http://www.jetbrains.com/webstorm/">WebStorm</a>,
-          <a href="http://jquery.com/">jQuery</a>,
-          <a href="http://jqueryui.com/">jQuery UI</a>,
-          <a href="http://api.jquery.com/category/plugins/templates/">jQuery Templates plugin</a>,
-          <a href="http://www.abeautifulsite.net/blog/2008/12/jquery-alert-dialogs/">jQuery Alert Dialogs plugin</a> etc.</small>
+          <a href="http://jquery.com/">jQuery</a> (<a href="http://jqueryui.com/">&amp; UI</a>),
+          <a href="http://api.jquery.com/category/plugins/templates/">Templates plugin</a>,
+          <a href="http://www.abeautifulsite.net/blog/2008/12/jquery-alert-dialogs/">Alert Dialogs plugin</a>,
+          <a href="http://gradients.glrzad.com/">CSS3 Gradient Generator</a>,
+          <a href="http://neutroncreations.com/blog/building-a-custom-html5-audio-player-with-jquery/">'The Particle Lab' blog</a> etc.</small>
   </footer>
 
 

@@ -75,9 +75,20 @@ var musicPlayer = (function ($) {
         nextButton:$("#next"),
         shuffleButton:$("#shuffle"),
         repeatButton:$("#repeat"),
+        seeker:$('#seeker'),
+        currentTime:$('#currentTime'),
+        remainingTime:$('#remainingTime'),
         nowPlayingClass:'nowPlaying',
         selectedClass:'selected',
-        pausedClass:'paused',
+        shuffle:function () {
+            return $('#shuffle').prop('checked')
+        },
+        repeat:function () {
+            return $('#repeat').prop('checked')
+        },
+        getPlayListItems:function () {
+            return $('#playlist ul.playlistItem')
+        },
         getAudioComponent:function () {
             if ($('#audio').find('audio').length > 0) {
                 return $('#audio').find('audio').get(0);
@@ -140,7 +151,9 @@ var musicPlayer = (function ($) {
                 icons:{
                     primary:"ui-icon-seek-end"
                 }
-            });
+            }).click(function () {
+                    musicPlayer.next();
+                });
             musicPlayer.shuffleButton.button({
                 text:false,
                 icons:{
@@ -158,6 +171,7 @@ var musicPlayer = (function ($) {
                         };
                     }
                     $(this).button("option", options);
+                    musicPlayer.emptyShufflePlayedList();
                 });
             musicPlayer.repeatButton.button({
                 text:false,
@@ -177,7 +191,7 @@ var musicPlayer = (function ($) {
                     }
                     $(this).button("option", options);
                 });
-            $('#audio,.myMarquee,#controls,#playlist').show('slow');
+            $('#audio,.myMarquee,#controls,#playlistSection').show('slow');
         },
         wireUpPageEvents:function () {
             $('#clearPlaylistButton').click(musicPlayer.clearPlaylist);
@@ -247,14 +261,18 @@ var musicPlayer = (function ($) {
         },
         addAndPlayAudio:function (track) {
             $('#audio').append($.tmpl("audioTemplate", track));
-            musicPlayer.setupSlider();
+            musicPlayer.setupSliderAndAudioEvents();
             musicPlayer.getAudioComponent().play();
         },
         stopAndRemoveAudio:function () {
             if (musicPlayer.getAudioComponent()) {
                 musicPlayer.getAudioComponent().pause();
+                musicPlayer.defaultSlider();
                 $('#audio').find('audio').remove();
             }
+        },
+        getSongScroller:function () {
+            return $('#songScroller div:first').text();
         },
         setSongScroller:function (text) {
             $('#songScroller div').text(text);
@@ -274,15 +292,60 @@ var musicPlayer = (function ($) {
             musicPlayer.setSongScroller(track.artist + " - " + track.trackTitle);
             return track;
         },
+        deselectAlItems:function () {
+            $('.playlistItem').removeClass(musicPlayer.selectedClass);
+        },
+        getSelectedItem:function () {
+            return $('.' + musicPlayer.selectedClass);
+        },
+        setSelectedItem:function (playlistItem) {
+            playlistItem.addClass(musicPlayer.selectedClass);
+        },
+        getNowPlayingItem:function () {
+            var nowPlayingItem = $('.' + musicPlayer.nowPlayingClass);
+            if (nowPlayingItem.length) {
+                return nowPlayingItem;
+            }
+            return null;
+        },
+        generateRandom:function (upper) {
+            var min = 0, max = upper;
+            var random = Math.floor(Math.random() * (max - min + 1)) + min;
+            return random;
+        },
+        getNextRandomItemNotShufflePlayed:function () {
+            var usedList = musicPlayer.getShufflePlyedList(),
+                upper = musicPlayer.getPlayListItems().length - 1,
+                randomItemIndex;
+            if (usedList.length === musicPlayer.getPlayListItems().length) {
+                return 0;
+            }
+            randomItemIndex = musicPlayer.generateRandom(upper);
+            while ($.inArray(randomItemIndex, usedList) > -1) {
+                randomItemIndex = musicPlayer.generateRandom(upper);
+            }
+            return musicPlayer.getPlayListItems().eq(randomItemIndex);
+        },
+        getShufflePlyedList:function(){
+            return musicPlayer.shuffleButton.data('shufflePlayedList') || [];
+        },
+        emptyShufflePlayedList:function () {
+            musicPlayer.shuffleButton.data('shufflePlayedList', []);
+        },
+        addToShufflePlayedList:function (listItemIndex) {
+            var shufflePlayedList = musicPlayer.getShufflePlyedList();
+            shufflePlayedList.push(listItemIndex);
+            musicPlayer.shuffleButton.data('shufflePlayedList', shufflePlayedList);
+        },
         playSelectedOrResumePaused:function () {
-            var pausedTrack = $('.' + musicPlayer.pausedClass);
-            if (pausedTrack.length > 0) {
-                var track = musicPlayer.setScrollerAndGetTrack(pausedTrack);
-                pausedTrack.removeClass(musicPlayer.pausedClass);
+            var audio = musicPlayer.getAudioComponent();
+            if (audio && audio.paused) {
+                musicPlayer.setSongScroller(musicPlayer.seeker.data('pausedTrackTitle'));
+                musicPlayer.seeker.data('pausedTrackTitle', '');
                 musicPlayer.getAudioComponent().play();
                 return true;
             } else {
-                var selectedTrack = $('.' + musicPlayer.selectedClass);
+                var selectedTrack = musicPlayer.getSelectedItem();
                 if (selectedTrack.length > 0) {
                     musicPlayer.play(selectedTrack);
                     return true;
@@ -294,8 +357,8 @@ var musicPlayer = (function ($) {
             }
         },
         pauseCurrentTrack:function () {
+            musicPlayer.seeker.data('pausedTrackTitle', musicPlayer.getSongScroller());
             musicPlayer.getAudioComponent().pause();
-            $('.' + musicPlayer.nowPlayingClass).addClass(musicPlayer.pausedClass);
             musicPlayer.setSongScroller(' - PAUSED -');
         },
         stop:function () {
@@ -308,40 +371,93 @@ var musicPlayer = (function ($) {
             var track = musicPlayer.setScrollerAndGetTrack(playlistItem);
             musicPlayer.addAndPlayAudio(track);
         },
-        setSelectedTrack:function (playlistItem) {
-            playlistItem.addClass(musicPlayer.selectedClass);
+        next:function () {
+            var nowPlayingItem = musicPlayer.getNowPlayingItem(),
+                nextPlayListItem,
+                nowPlayingItemIndex = nowPlayingItem.index() - 1; //correcton for #playlistHead sibling
+
+            if (nowPlayingItem) {
+                musicPlayer.stopButton.click();
+                musicPlayer.deselectAlItems();
+                if (!musicPlayer.shuffle()) {
+                    nextPlayListItem = musicPlayer.getPlayListItems().eq(nowPlayingItemIndex + 1);
+                    if (nextPlayListItem.length) {
+                        musicPlayer.setSelectedItem(nextPlayListItem);
+                    } else if (musicPlayer.repeat()) {
+                        musicPlayer.setSelectedItem(musicPlayer.getPlayListItems().eq(0));
+                    }
+                } else {
+                    musicPlayer.addToShufflePlayedList(nowPlayingItemIndex);
+                    nextPlayListItem = musicPlayer.getNextRandomItemNotShufflePlayed();
+                    if (nextPlayListItem) {
+                        musicPlayer.setSelectedItem(nextPlayListItem);
+                    } else if (musicPlayer.repeat()) {
+                        musicPlayer.emptyShufflePlayedList();
+                        musicPlayer.addToShufflePlayedList(nowPlayingItemIndex);
+                        musicPlayer.setSelectedItem(musicPlayer.getNextRandomItemNotShufflePlayed());
+                    }
+                }
+                if (musicPlayer.getSelectedItem().length) {
+                    musicPlayer.playButton.click();
+                }
+            }
+        },
+        previous:function () {
+            //if nothing is playing return
+            //stop current track
+            //get the nowplayingtrack index
+            //if shuffle off
+            //  if exist nowPlayingTrackIndex - 1 track
+            //      select nowPlayingTrackIndex - 1 track
+            //  else if repeat on
+            //      select maxIndex track
+            //else
+            //  if exist (items in shuffledList)
+            //      select (maxIndex item in shuffledList)
+            //  else if repeat on
+            //      select (nextRandomTrack not in shuffledList)
         },
         trackClick:function (e) {
-            $('.playlistItem').removeClass(musicPlayer.selectedClass);
-            musicPlayer.setSelectedTrack($(this));
+            musicPlayer.deselectAlItems();
+            musicPlayer.setSelectedItem($(this));
         },
         trackDoubleClick:function (e) {
             musicPlayer.stopButton.click();
-            musicPlayer.setSelectedTrack($(this));
+            musicPlayer.setSelectedItem($(this));
             musicPlayer.playButton.click();
             e.preventDefault();
             e.stopPropagation();
         },
-        setupSlider:function () {
+        defaultSlider:function () {
+            musicPlayer.seeker.slider({value:0});
+            musicPlayer.currentTime.empty();
+            musicPlayer.remainingTime.empty();
+        },
+        setupSliderAndAudioEvents:function () {
             // http://neutroncreations.com/blog/building-a-custom-html5-audio-player-with-jquery/
             var audio = musicPlayer.getAudioComponent(),
-                timeleft = $('#remainingTime'),
-                positionIndicator = $('#seeker #handle'),
+                seekerHandle = musicPlayer.seeker.find('#handle'),
                 manualSeek, loaded;
 
             $(audio).bind('timeupdate', function () {
-                var remaining = parseInt(audio.duration - audio.currentTime, 10),
-                    position = (audio.currentTime / audio.duration) * 100,
-                    minutes = Math.floor(remaining / 60, 10),
-                    seconds = remaining - minutes * 60;
-                timeleft.text('-' + minutes + ':' + (seconds > 9 ? seconds : '0' + seconds));
+                var currentTimeInt = parseInt(audio.currentTime, 10),
+                    durationInt = parseInt(audio.duration, 10),
+                    remainingTime = durationInt - currentTimeInt,
+                    currentMinutes = Math.floor(currentTimeInt / 60, 10),
+                    currentSeconds = currentTimeInt - currentMinutes * 60,
+                    remainingMinutes = Math.floor(remainingTime / 60, 10),
+                    remainingSeconds = remainingTime - remainingMinutes * 60,
+                    position = (audio.currentTime / audio.duration) * 100;
+
+                musicPlayer.currentTime.text(currentMinutes + ':' + (currentSeconds > 9 ? currentSeconds : '0' + currentSeconds));
+                musicPlayer.remainingTime.text('-' + remainingMinutes + ':' + (remainingSeconds > 9 ? remainingSeconds : '0' + remainingSeconds));
                 if (!manualSeek) {
-                    positionIndicator.css({left:position + '%'});
+                    seekerHandle.css({left:position + '%'});
                 }
                 if (!loaded) {
                     loaded = true;
 
-                    $('#seeker').slider({
+                    musicPlayer.seeker.slider({
                         value:0,
                         step:0.01,
                         orientation:"horizontal",
@@ -357,34 +473,29 @@ var musicPlayer = (function ($) {
                         }
                     });
                 }
-
             });
         },
         initializePage:function () {
-            //don't show the seeker, if ogg/mp3 is not supported
             if (Modernizr.audio.ogg || Modernizr.audio.mp3) {
-                $('#seeker').slider();
+                musicPlayer.setupPlayerButtons();
+                musicPlayer.defaultSlider();
+
+                var library = musicPlayer.getLibrary();
+                musicPlayer.compilejQueryTemplates();
+                $.each(library.albums, function (index, album) {
+                    $('#albums').append($.tmpl("albumTemplate", album));
+                });
+
+                musicPlayer.wireUpPageEvents();
+            } else {
+                $('#unsupportedBrowser').show('slow');
             }
-
-            musicPlayer.setupPlayerButtons();
-
-            musicPlayer.compilejQueryTemplates();
-
-            //get library (from mock) and render it
-            var library = musicPlayer.getLibrary();
-            $.each(library.albums, function (index, album) {
-                $('#albums').append($.tmpl("albumTemplate", album));
-            });
-
-            musicPlayer.wireUpPageEvents();
-
         }
     };
 }(jQuery));
 
 $(function () {
     musicPlayer.initializePage();
-    musicPlayer.addAlbumToPlaylist(102);
 });
 
 
