@@ -12,19 +12,22 @@ var mockData = {
                         trackId:10101,
                         trackTitle:"Symphony 05",
                         artist:"Beethoven",
-                        trackLocation:"music/Beethoven_Symphony_5"
+                        trackLocationOgg:"music/Beethoven_Symphony_5.ogg",
+                        trackLocationMp3:"music/Beethoven_Symphony_5.mp3"
                     },
                     {
                         trackId:10102,
                         trackTitle:"Symphony 07",
                         artist:"Beethoven",
-                        trackLocation:"music/Beethoven_Symphony_7"
+                        trackLocationOgg:"music/Beethoven_Symphony_7.ogg",
+                        trackLocationMp3:"music/Beethoven_Symphony_7.mp3"
                     },
                     {
                         trackId:10103,
                         trackTitle:"Symphony 40",
                         artist:"Mozart",
-                        trackLocation:"music/Mozart_Symphony_40"
+                        trackLocationOgg:"music/Mozart_Symphony_40.ogg",
+                        trackLocationMp3:"music/Mozart_Symphony_40.mp3"
                     }
                 ]
             },
@@ -36,18 +39,32 @@ var mockData = {
                         trackId:10201,
                         trackTitle:"Concerto 01",
                         artist:"Bach",
-                        trackLocation:"music/Bach_Concerto_1"
+                        trackLocationOgg:"music/Bach_Concerto_1.ogg",
+                        trackLocationMp3:"music/Bach_Concerto_1.mp3"
                     },
                     {
                         trackId:10202,
                         trackTitle:"Concerto 04",
                         artist:"Brandenburg",
-                        trackLocation:"music/Brandenburg_Concerto_4"
+                        trackLocationOgg:"music/Brandenburg_Concerto_4.ogg",
+                        trackLocationMp3:"music/Brandenburg_Concerto_4.mp3"
                     }
                 ]
+            },
+            {
+                albumId:103,
+                albumTitle:"Miscellaneous",
+                tracks:[]
             }
         ]
     }
+};
+
+Array.min = function (array) {
+    return Math.min.apply(Math, array);
+};
+Array.max = function (array) {
+    return Math.max.apply(Math, array);
 };
 
 var musicPlayer = (function ($) {
@@ -62,8 +79,11 @@ var musicPlayer = (function ($) {
             return mockData.library;
         },
         literals:{
-            albumExists:'Album is already in the playlist.',
+            albumExists:'Some album track(s) are already in the playlist.' +
+                '\r\nClear all and try adding the album again.',
             albumExistsTitle:'We have it!',
+            trackExists:'Track is already in the playlist.',
+            trackExistsTitle:'We have it!',
             confirmClearPlaylist:'Music would stop and playlist would clear. Continue?',
             confirmClearPlaylistTitle:'Well...?',
             noTrackSelected:'Click on a track and hit play. Or double click on a track to play it.',
@@ -81,16 +101,16 @@ var musicPlayer = (function ($) {
         nowPlayingClass:'nowPlaying',
         selectedClass:'selected',
         shuffle:function () {
-            return $('#shuffle').prop('checked')
+            return $('#shuffle').prop('checked');
         },
         repeat:function () {
-            return $('#repeat').prop('checked')
+            return $('#repeat').prop('checked');
         },
         getPlayListItems:function () {
-            return $('#playlist ul.playlistItem')
+            return $('#playlist').find('ul.playlistItem');
         },
         getAudioComponent:function () {
-            if ($('#audio').find('audio').length > 0) {
+            if ($('#audio').find('audio').length) {
                 return $('#audio').find('audio').get(0);
             }
             return null;
@@ -101,7 +121,9 @@ var musicPlayer = (function ($) {
                 icons:{
                     primary:"ui-icon-seek-start"
                 }
-            });
+            }).click(function () {
+                    musicPlayer.previous();
+                });
             musicPlayer.playButton.button({
                 text:false,
                 icons:{
@@ -194,8 +216,10 @@ var musicPlayer = (function ($) {
             $('#audio,.myMarquee,#controls,#playlistSection').show('slow');
         },
         wireUpPageEvents:function () {
-            $('#clearPlaylistButton').click(musicPlayer.clearPlaylist);
+            $('#clearPlaylistButton').button().click(musicPlayer.clearPlaylist);
+            $('#addToLibraryButton').button().click(musicPlayer.addToLibraryButtonClick);
             $('.addAlbumButton').live('click', musicPlayer.addAlbumButtonClick);
+            $('.addSongButton').live('click', musicPlayer.addSongButtonClick);
             $('ul.playlistItem').live('click', musicPlayer.trackClick);
             $('ul.playlistItem').live('dblclick', musicPlayer.trackDoubleClick);
         },
@@ -207,7 +231,7 @@ var musicPlayer = (function ($) {
             $("#playlistitemtemplate").template("playlistitemtemplate");
         },
         clearPlaylist:function () {
-            if ($('#playlist').find('ul.playlistItem').length > 0) {
+            if ($('#playlist').find('ul.playlistItem').length) {
                 musicPlayer.askQuestion(musicPlayer.literals.confirmClearPlaylist,
                     musicPlayer.literals.confirmClearPlaylistTitle,
                     function (confirmed) {
@@ -219,6 +243,67 @@ var musicPlayer = (function ($) {
                         }
                     });
             }
+        },
+        getLargestTrackIdInMiscellaneous:function () {
+            var miscellaneousTracks = mockData.library.albums[2].tracks;
+            if (miscellaneousTracks.length) {
+                var trackIdArray = $.map(miscellaneousTracks, function (track, index) {
+                    return track.trackId;
+                });
+                return Array.max(trackIdArray) + 1;
+            } else {
+                return 10301;
+            }
+        },
+        setupAddTrackDialog:function () {
+            $('#addToLibraryDialog').dialog({
+                autoOpen:false,
+                title:'Add Track to Library',
+                height:330,
+                width:512,
+                modal:true,
+                buttons:{
+                    "Add Track to Library":function () {
+                        var valid = true;
+                        $(this).find(':input').removeClass('ui-state-error');
+                        if (!$(this).find('#track').val()) {
+                            valid = false;
+                            $(this).find('#track').addClass('ui-state-error');
+                        }
+                        if (!$(this).find('#trackLocationOgg').val()) {
+                            valid = false;
+                            $(this).find('#trackLocationOgg').addClass('ui-state-error');
+                        }
+                        if (!$(this).find('#trackLocationMp3').val()) {
+                            valid = false;
+                            $(this).find('#trackLocationMp3').addClass('ui-state-error');
+                        }
+                        if (!valid) {
+                            return;
+                        }
+                        var track = {
+                            trackId:musicPlayer.getLargestTrackIdInMiscellaneous(),
+                            trackTitle:$(this).find('#track').val(),
+                            artist:$(this).find('#artist').val() || '&#160;',
+                            trackLocationOgg:$(this).find('#trackLocationOgg').val(),
+                            trackLocationMp3:$(this).find('#trackLocationMp3').val()
+                        }
+                        mockData.library.albums[2].tracks.push(track);
+                        $(this).find('#track').val('');
+                        $(this).find('#artist').val('');
+                        $(this).find('#trackLocationOgg').val('');
+                        $(this).find('#trackLocationMp3').val('');
+                        $(this).dialog('close');
+                        musicPlayer.refreshAlbumsFromLibrary();
+                    },
+                    "Close":function () {
+                        $(this).dialog('close');
+                    }
+                }
+            });
+        },
+        addToLibraryButtonClick:function () {
+            $('#addToLibraryDialog').dialog('open');
         },
         flattenTracksList:function (albumId) {
             var originalAlbum,
@@ -238,7 +323,8 @@ var musicPlayer = (function ($) {
                         trackId:track.trackId,
                         trackTitle:track.trackTitle,
                         artist:track.artist,
-                        trackLocation:track.trackLocation
+                        trackLocationOgg:track.trackLocationOgg,
+                        trackLocationMp3:track.trackLocationMp3
                     });
                 });
             }
@@ -246,6 +332,24 @@ var musicPlayer = (function ($) {
         },
         addAlbumButtonClick:function () {
             musicPlayer.addAlbumToPlaylist($(this).prev('h4').data('albumId'));
+        },
+        addSongButtonClick:function () {
+            var albumId = $(this).closest('section.songs').prev('header').find('h4').data('albumId'),
+                flattenedList = musicPlayer.flattenTracksList(albumId),
+                trackId = $(this).parent().data('trackId'),
+                track;
+            if ($('#playlist').find('ul[data-track-id=' + trackId + ']').length === 0) {
+                $.each(flattenedList, function (index, flattenedTrack) {
+                    if (flattenedTrack.trackId === trackId) {
+                        track = flattenedTrack;
+                        return;
+                    }
+                });
+                $('#playlist').append($.tmpl("playlistitemtemplate", track));
+                $('.playlistItem li').show('slow');
+            } else {
+                musicPlayer.showMessage(musicPlayer.literals.trackExists, musicPlayer.literals.trackExistsTitle);
+            }
         },
         addAlbumToPlaylist:function (albumId) {
             var flattenedTracksList;
@@ -284,7 +388,8 @@ var musicPlayer = (function ($) {
                 trackId:playlistItem.data('trackId'),
                 trackTitle:playlistItem.find('li.trackTitle').text(),
                 artist:playlistItem.find('li.artist').text(),
-                trackLocation:playlistItem.data('trackLocation')
+                trackLocationOgg:playlistItem.data('trackLocationOgg'),
+                trackLocationMp3:playlistItem.data('trackLocationMp3')
             }
         },
         setScrollerAndGetTrack:function (playlistItem) {
@@ -314,7 +419,7 @@ var musicPlayer = (function ($) {
             return random;
         },
         getNextRandomItemNotShufflePlayed:function () {
-            var usedList = musicPlayer.getShufflePlyedList(),
+            var usedList = musicPlayer.getShufflePlayedList(),
                 upper = musicPlayer.getPlayListItems().length - 1,
                 randomItemIndex;
             if (usedList.length === musicPlayer.getPlayListItems().length) {
@@ -326,14 +431,14 @@ var musicPlayer = (function ($) {
             }
             return musicPlayer.getPlayListItems().eq(randomItemIndex);
         },
-        getShufflePlyedList:function(){
+        getShufflePlayedList:function () {
             return musicPlayer.shuffleButton.data('shufflePlayedList') || [];
         },
         emptyShufflePlayedList:function () {
             musicPlayer.shuffleButton.data('shufflePlayedList', []);
         },
         addToShufflePlayedList:function (listItemIndex) {
-            var shufflePlayedList = musicPlayer.getShufflePlyedList();
+            var shufflePlayedList = musicPlayer.getShufflePlayedList();
             shufflePlayedList.push(listItemIndex);
             musicPlayer.shuffleButton.data('shufflePlayedList', shufflePlayedList);
         },
@@ -371,14 +476,45 @@ var musicPlayer = (function ($) {
             var track = musicPlayer.setScrollerAndGetTrack(playlistItem);
             musicPlayer.addAndPlayAudio(track);
         },
-        next:function () {
+        previous:function () {
             var nowPlayingItem = musicPlayer.getNowPlayingItem(),
-                nextPlayListItem,
-                nowPlayingItemIndex = nowPlayingItem.index() - 1; //correcton for #playlistHead sibling
+                previousPlayListItem,
+                nowPlayingItemIndex;
 
             if (nowPlayingItem) {
                 musicPlayer.stopButton.click();
                 musicPlayer.deselectAlItems();
+                nowPlayingItemIndex = nowPlayingItem.index() - 1; //correcton for #playlistHead sibling
+                if (!musicPlayer.shuffle()) {
+                    previousPlayListItem = musicPlayer.getPlayListItems().eq(nowPlayingItemIndex - 1);
+                    if (nowPlayingItemIndex && previousPlayListItem.length) {
+                        musicPlayer.setSelectedItem(previousPlayListItem);
+                    } else if (musicPlayer.repeat()) {
+                        musicPlayer.setSelectedItem(musicPlayer.getPlayListItems().eq(-1));
+                    }
+                } else {
+                    var shufflePlayedList = musicPlayer.getShufflePlayedList();
+                    if (shufflePlayedList.length) {
+                        var lastPlayedItemIndex = shufflePlayedList.pop();
+                        musicPlayer.setSelectedItem(musicPlayer.getPlayListItems().eq(lastPlayedItemIndex));
+                    } else if (musicPlayer.repeat()) {
+                        musicPlayer.setSelectedItem(musicPlayer.getNextRandomItemNotShufflePlayed());
+                    }
+                }
+                if (musicPlayer.getSelectedItem().length) {
+                    musicPlayer.playButton.click();
+                }
+            }
+        },
+        next:function () {
+            var nowPlayingItem = musicPlayer.getNowPlayingItem(),
+                nextPlayListItem,
+                nowPlayingItemIndex;
+
+            if (nowPlayingItem) {
+                musicPlayer.stopButton.click();
+                musicPlayer.deselectAlItems();
+                nowPlayingItemIndex = nowPlayingItem.index() - 1; //correcton for #playlistHead sibling
                 if (!musicPlayer.shuffle()) {
                     nextPlayListItem = musicPlayer.getPlayListItems().eq(nowPlayingItemIndex + 1);
                     if (nextPlayListItem.length) {
@@ -402,21 +538,6 @@ var musicPlayer = (function ($) {
                 }
             }
         },
-        previous:function () {
-            //if nothing is playing return
-            //stop current track
-            //get the nowplayingtrack index
-            //if shuffle off
-            //  if exist nowPlayingTrackIndex - 1 track
-            //      select nowPlayingTrackIndex - 1 track
-            //  else if repeat on
-            //      select maxIndex track
-            //else
-            //  if exist (items in shuffledList)
-            //      select (maxIndex item in shuffledList)
-            //  else if repeat on
-            //      select (nextRandomTrack not in shuffledList)
-        },
         trackClick:function (e) {
             musicPlayer.deselectAlItems();
             musicPlayer.setSelectedItem($(this));
@@ -437,54 +558,97 @@ var musicPlayer = (function ($) {
             // http://neutroncreations.com/blog/building-a-custom-html5-audio-player-with-jquery/
             var audio = musicPlayer.getAudioComponent(),
                 seekerHandle = musicPlayer.seeker.find('#handle'),
-                manualSeek, loaded;
+                manualSeek, sliderAdded;
 
-            $(audio).bind('timeupdate', function () {
-                var currentTimeInt = parseInt(audio.currentTime, 10),
-                    durationInt = parseInt(audio.duration, 10),
-                    remainingTime = durationInt - currentTimeInt,
-                    currentMinutes = Math.floor(currentTimeInt / 60, 10),
-                    currentSeconds = currentTimeInt - currentMinutes * 60,
-                    remainingMinutes = Math.floor(remainingTime / 60, 10),
-                    remainingSeconds = remainingTime - remainingMinutes * 60,
-                    position = (audio.currentTime / audio.duration) * 100;
+            $(audio).bind('timeupdate',
+                function () {
+                    var currentTimeInt = parseInt(audio.currentTime, 10),
+                        durationInt = parseInt(audio.duration, 10),
+                        remainingTime = durationInt - currentTimeInt,
+                        currentMinutes = Math.floor(currentTimeInt / 60, 10),
+                        currentSeconds = currentTimeInt - currentMinutes * 60,
+                        remainingMinutes = Math.floor(remainingTime / 60, 10),
+                        remainingSeconds = remainingTime - remainingMinutes * 60,
+                        position = (audio.currentTime / audio.duration) * 100;
 
-                musicPlayer.currentTime.text(currentMinutes + ':' + (currentSeconds > 9 ? currentSeconds : '0' + currentSeconds));
-                musicPlayer.remainingTime.text('-' + remainingMinutes + ':' + (remainingSeconds > 9 ? remainingSeconds : '0' + remainingSeconds));
-                if (!manualSeek) {
-                    seekerHandle.css({left:position + '%'});
-                }
-                if (!loaded) {
-                    loaded = true;
+                    musicPlayer.currentTime.text(currentMinutes + ':' + (currentSeconds > 9 ? currentSeconds : '0' + currentSeconds));
+                    musicPlayer.remainingTime.text('-' + remainingMinutes + ':' + (remainingSeconds > 9 ? remainingSeconds : '0' + remainingSeconds));
 
-                    musicPlayer.seeker.slider({
-                        value:0,
-                        step:0.01,
-                        orientation:"horizontal",
-                        range:"min",
-                        max:audio.duration,
-                        animate:true,
-                        slide:function () {
-                            manualSeek = true;
-                        },
-                        stop:function (e, ui) {
-                            manualSeek = false;
-                            audio.currentTime = ui.value;
+                    if (!manualSeek) {
+                        seekerHandle.css({left:position + '%'});
+                    }
+
+                    if (!sliderAdded) {
+                        sliderAdded = true;
+                        musicPlayer.seeker.slider({
+                            value:0,
+                            step:0.01,
+                            orientation:"horizontal",
+                            range:"min",
+                            max:audio.duration,
+                            animate:true,
+                            slide:function () {
+                                manualSeek = true;
+                            },
+                            stop:function (e, ui) {
+                                manualSeek = false;
+                                audio.currentTime = ui.value;
+                            }
+                        });
+                    }
+                }).
+                bind('ended', function () {
+                    musicPlayer.next();
+                });
+        },
+        fixPlaceHolderTextForOlderBrowsers:function () {
+            if (!Modernizr.input.placeholder) {
+                $('[placeholder]').focus(
+                    function () {
+                        var input = $(this);
+                        if (input.val() == input.attr('placeholder')) {
+                            input.val('');
+                            input.removeClass('placeholder');
                         }
-                    });
-                }
+                    }).blur(
+                    function () {
+                        var input = $(this);
+                        if (input.val() == '' || input.val() == input.attr('placeholder')) {
+                            input.addClass('placeholder');
+                            input.val(input.attr('placeholder'));
+                        }
+                    }).blur();
+                $('[placeholder]').parents('form').submit(function () {
+                    $(this).find('[placeholder]').each(function () {
+                        var input = $(this);
+                        if (input.val() == input.attr('placeholder')) {
+                            input.val('');
+                        }
+                    })
+                });
+            }
+        },
+        refreshAlbumsFromLibrary:function () {
+            var library = musicPlayer.getLibrary();
+            $('#albums').empty();
+            $.each(library.albums, function (index, album) {
+                $('#albums').append($.tmpl("albumTemplate", album));
             });
+            $('.albumSection').show('slow');
+            $('.addAlbumButton,.addSongButton').button();
         },
         initializePage:function () {
             if (Modernizr.audio.ogg || Modernizr.audio.mp3) {
                 musicPlayer.setupPlayerButtons();
                 musicPlayer.defaultSlider();
 
-                var library = musicPlayer.getLibrary();
                 musicPlayer.compilejQueryTemplates();
-                $.each(library.albums, function (index, album) {
-                    $('#albums').append($.tmpl("albumTemplate", album));
-                });
+
+                musicPlayer.refreshAlbumsFromLibrary();
+
+                musicPlayer.setupAddTrackDialog();
+
+                musicPlayer.fixPlaceHolderTextForOlderBrowsers();
 
                 musicPlayer.wireUpPageEvents();
             } else {

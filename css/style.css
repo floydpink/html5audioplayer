@@ -224,6 +224,13 @@ div[role='main']{
     width: 800px;
     box-shadow: 0  0 10px 5px rgba(0, 0, 0, 0.3);
     padding: 10px;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
 }
 
 article{
@@ -233,8 +240,6 @@ article{
 #player{
     float:left;
     width:37%;
-    -moz-user-select: none;
-    -khtml-user-select: none;
 }
 
 .ui-widget{
@@ -362,7 +367,7 @@ noindex:-o-prefocus, #controls label{
     float: right;
     margin-top: 10px;
     margin-right: 2px;
-    font-size: 0.8em;
+    font-size: 0.7em;
 }
 
 #library{
@@ -371,12 +376,22 @@ noindex:-o-prefocus, #controls label{
     margin-left: 10px;
 }
 
+#addToLibraryButton{
+    margin-left: 300px;
+    font-size: 0.7em;
+}
+
 #albums{
     overflow: auto;
     max-height: 450px;
 }
 
+.albumSection{
+    display: none;
+}
+
 .albumHeader{
+    padding: 0 15px;
     border-bottom: 1px dotted rgba(3, 3, 15, 0.77);
 }
 
@@ -387,12 +402,32 @@ noindex:-o-prefocus, #controls label{
 .addAlbumButton{
     float: right;
     margin-top: 20px;
-    margin-right: 90px;
-    font-size: 0.8em;
+    margin-right: -10px;
+    font-size: 0.7em;
 }
 
 .songs ul {
     list-style: none;
+}
+
+.songs ul li{
+    border: transparent dotted thin;
+    margin-right: 3px;
+    padding: 0 3px;
+}
+
+.addSongButton{
+    float: right;
+    font-size: 0.55em;
+    display: none;
+}
+
+.songs ul li:hover{
+    border: #bbbbbb dotted thin;
+    box-shadow: #99a 0 0 6px 3px;
+}
+.songs ul li:hover .addSongButton{
+    display: inline;
 }
 
 #unsupportedBrowser{
@@ -404,7 +439,32 @@ footer{
     text-shadow: #bbb 1px 1px 5px;
     margin-top: 30px;
     text-align: center;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
 }
+
+#addToLibraryDialog{
+    display: none;
+}
+
+#addToLibraryDialog input, #addToLibraryDialog label{
+    display: block;
+    width: 100%;
+    margin:4px 0;
+}
+::-webkit-input-placeholder {
+    color: #999;
+}
+:-moz-placeholder {
+    color: #999;
+}
+
+
+
 
 
 

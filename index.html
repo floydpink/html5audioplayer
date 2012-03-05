@@ -83,6 +83,7 @@
       <aside id="library">
           <header>
               <h1>Library</h1>
+              <button id="addToLibraryButton">Add New Track to Library</button>
           </header>
           <div id="albums">
               <!-- templated albums would follow -->
@@ -102,7 +103,72 @@
           <a href="http://gradients.glrzad.com/">CSS3 Gradient Generator</a>,
           <a href="http://neutroncreations.com/blog/building-a-custom-html5-audio-player-with-jquery/">'The Particle Lab' blog</a> etc.</small>
   </footer>
+  
+  <div id="addToLibraryDialog">
+      <form>
+          <fieldset>
+              <small>Track and URLs are required</small>
+              <label for="track">Track</label>
+              <input type="text" name="track" id="track" class="text ui-widget-content ui-corner-all"
+                      placeholder="Title of the Track (egs. Symphony 04)"/>
+              <label for="artist">Artist</label>
+              <input type="text" name="artist" id="artist" class="text ui-widget-content ui-corner-all"
+                      placeholder="Artist for this Track (egs. Ludwig van Beethoven)"/>
+              <label for="trackLocationOgg">URL to .ogg file</label>
+              <input type="text" name="trackLocationOgg" id="trackLocationOgg" class="text ui-widget-content ui-corner-all"
+                      placeholder="http://upload.wikimedia.org/wikipedia/commons/8/8c/Ludwig_van_Beethoven_-_symphony_no._4_in_b_flat_major%2C_op._60_-_ii._adagio.ogg"/>
+              <label for="trackLocationMp3">URL to .mp3 file</label>
+              <input type="text" name="trackLocationMp3" id="trackLocationMp3" class="text ui-widget-content ui-corner-all"
+                      placeholder="http://someplace.that.has.mp3/thistrack.mp3"/>
+              <small>Track would be added to an album titled 'Miscellaneous'</small>
+          </fieldset>
+      </form>
+  </div>
 
+
+  <script id="audioTemplate" type="text/x-jquery-tmpl">
+      <audio>
+          <source src="${trackLocationOgg}" type="audio/ogg">
+          <source src="${trackLocationMp3}" type="audio/mp3">
+          Your browser does not support this format of audio !
+      </audio>
+  </script>
+
+  <script id="albumTemplate" type="text/x-jquery-tmpl">
+      <section class="albumSection">
+          <header class="albumHeader">
+              <h4 class="albumTitle" data-album-id="${albumId}">${albumTitle}</h4>
+              <button class="addAlbumButton">Add Album to Playlist</button>
+              <div class="clearfix"></div>
+          </header>
+          <section class="songs">
+              <ul>
+                  {{each tracks}}
+                  {{tmpl($value) "albumListingTemplate"}}
+                  {{/each}}
+              </ul>
+          </section>
+      </section>
+  </script>
+
+  <script id="albumListingTemplate" type="text/x-jquery-tmpl">
+      <li data-track-id="${trackId}" data-track-location-ogg="${trackLocationOgg}"
+          data-track-location-mp3="${trackLocationMp3}">
+          ${trackTitle} - ${artist}
+          <button class="addSongButton">Add Track to Playlist</button>
+      </li>
+  </script>
+
+  <script id="playlistitemtemplate" type="text/x-jquery-tmpl">
+      <ul class="playlistItem" title="Double click to start playing"
+          data-album-id="${albumId}" data-track-id="${trackId}"
+          data-track-location-ogg="${trackLocationOgg}"
+          data-track-location-mp3="${trackLocationMp3}">
+          <li class="trackTitle">${trackTitle}</li>
+          <li class="albumTitle">${albumTitle}</li>
+          <li class="artist">${artist}</li>
+      </ul>
+  </script>
 
   <!-- JavaScript at the bottom for fast page loading -->
 
@@ -126,45 +192,6 @@
     (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
     g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
     s.parentNode.insertBefore(g,s)}(document,'script'));
-  </script>
-
-  <script id="audioTemplate" type="text/x-jquery-tmpl">
-      <audio>
-          <source src="${trackLocation}.ogg" type="audio/ogg">
-          <source src="${trackLocation}.mp3" type="audio/mp3">
-          Your browser does not support this format of audio !
-      </audio>
-  </script>
-
-  <script id="albumTemplate" type="text/x-jquery-tmpl">
-      <section>
-          <header class="albumHeader">
-              <h4 class="albumTitle" data-album-id="${albumId}">${albumTitle}</h4>
-              <button class="addAlbumButton">Add to Playlist</button>
-              <div class="clearfix"></div>
-          </header>
-          <section class="songs">
-              <ul>
-                  {{each tracks}}
-                  {{tmpl($value) "albumListingTemplate"}}
-                  {{/each}}
-              </ul>
-          </section>
-      </section>
-  </script>
-
-  <script id="albumListingTemplate" type="text/x-jquery-tmpl">
-      <li data-track-id="${trackId}" data-track-location="${trackLocation}">${trackTitle} - ${artist}</li>
-  </script>
-
-  <script id="playlistitemtemplate" type="text/x-jquery-tmpl">
-      <ul class="playlistItem" title="Double click to start playing"
-          data-album-id="${albumId}" data-track-id="${trackId}"
-          data-track-location="${trackLocation}">
-          <li class="trackTitle">${trackTitle}</li>
-          <li class="albumTitle">${albumTitle}</li>
-          <li class="artist">${artist}</li>
-      </ul>
   </script>
 
 </body>
