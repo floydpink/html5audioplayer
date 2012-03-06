@@ -377,6 +377,7 @@ noindex:-o-prefocus, #controls label{
 }
 
 #addToLibraryButton{
+    margin-bottom: 10px;
     margin-left: 300px;
     font-size: 0.7em;
 }

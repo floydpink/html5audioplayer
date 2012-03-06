@@ -69,11 +69,24 @@ Array.max = function (array) {
 
 var musicPlayer = (function ($) {
     return {
+        addOverlay:function () {
+            $('body').append($('<div>').attr('id', 'myOverlay').addClass('ui-widget-overlay'));
+        },
+        removeOverlay:function () {
+            $('#myOverlay').remove();
+        },
         showMessage:function (message, title) {
-            jAlert(message, title);
+            musicPlayer.addOverlay();
+            jAlert(message, title, function () {
+                musicPlayer.removeOverlay();
+            });
         },
         askQuestion:function (message, title, returnAction) {
-            jConfirm(message, title, returnAction);
+            musicPlayer.addOverlay();
+            jConfirm(message, title, function (confirmed) {
+                musicPlayer.removeOverlay();
+                returnAction(confirmed);
+            });
         },
         getLibrary:function () {
             return mockData.library;
@@ -81,9 +94,8 @@ var musicPlayer = (function ($) {
         literals:{
             albumExists:'Some album track(s) are already in the playlist.' +
                 '\r\nClear all and try adding the album again.',
-            albumExistsTitle:'We have it!',
             trackExists:'Track is already in the playlist.',
-            trackExistsTitle:'We have it!',
+            albumOrTrackExistsTitle:'We already have it!',
             confirmClearPlaylist:'Music would stop and playlist would clear. Continue?',
             confirmClearPlaylistTitle:'Well...?',
             noTrackSelected:'Click on a track and hit play. Or double click on a track to play it.',
@@ -262,9 +274,18 @@ var musicPlayer = (function ($) {
                 height:330,
                 width:512,
                 modal:true,
+                open:function (event, ui) {
+                    musicPlayer.fixPlaceHolderTextForOlderBrowsers();
+                },
                 buttons:{
                     "Add Track to Library":function () {
                         var valid = true;
+                        $('[placeholder]').each(function () {
+                            var input = $(this);
+                            if (input.val() == input.attr('placeholder')) {
+                                input.val('');
+                            }
+                        })
                         $(this).find(':input').removeClass('ui-state-error');
                         if (!$(this).find('#track').val()) {
                             valid = false;
@@ -279,6 +300,9 @@ var musicPlayer = (function ($) {
                             $(this).find('#trackLocationMp3').addClass('ui-state-error');
                         }
                         if (!valid) {
+                            $('[placeholder]').each(function () {
+                                $(this).focus().blur();
+                            });
                             return;
                         }
                         var track = {
@@ -348,7 +372,7 @@ var musicPlayer = (function ($) {
                 $('#playlist').append($.tmpl("playlistitemtemplate", track));
                 $('.playlistItem li').show('slow');
             } else {
-                musicPlayer.showMessage(musicPlayer.literals.trackExists, musicPlayer.literals.trackExistsTitle);
+                musicPlayer.showMessage(musicPlayer.literals.trackExists, musicPlayer.literals.albumOrTrackExistsTitle);
             }
         },
         addAlbumToPlaylist:function (albumId) {
@@ -360,7 +384,7 @@ var musicPlayer = (function ($) {
                 });
                 $('.playlistItem li').show('slow');
             } else {
-                musicPlayer.showMessage(musicPlayer.literals.albumExists, musicPlayer.literals.albumExistsTitle);
+                musicPlayer.showMessage(musicPlayer.literals.albumExists, musicPlayer.literals.albumOrTrackExistsTitle);
             }
         },
         addAndPlayAudio:function (track) {
@@ -632,7 +656,9 @@ var musicPlayer = (function ($) {
             var library = musicPlayer.getLibrary();
             $('#albums').empty();
             $.each(library.albums, function (index, album) {
-                $('#albums').append($.tmpl("albumTemplate", album));
+                if (album.tracks.length) {
+                    $('#albums').append($.tmpl("albumTemplate", album));
+                }
             });
             $('.albumSection').show('slow');
             $('.addAlbumButton,.addSongButton').button();
@@ -640,6 +666,7 @@ var musicPlayer = (function ($) {
         initializePage:function () {
             if (Modernizr.audio.ogg || Modernizr.audio.mp3) {
                 musicPlayer.setupPlayerButtons();
+
                 musicPlayer.defaultSlider();
 
                 musicPlayer.compilejQueryTemplates();
