@@ -1,0 +1,200 @@
+<!doctype html>
+<!-- paulirish.com/2008/conditional-stylesheets-vs-css-hacks-answer-neither/ -->
+<!--[if lt IE 7]> <html class="no-js lt-ie9 lt-ie8 lt-ie7" lang="en"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js lt-ie9 lt-ie8" lang="en"> <![endif]-->
+<!--[if IE 8]>    <html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!-- Consider adding a manifest.appcache: h5bp.com/d/Offline -->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en"> <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+
+  <!-- Use the .htaccess and remove these lines to avoid edge case issues.
+       More info: h5bp.com/i/378 -->
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+  <title>My Tunes</title>
+  <meta name="description" content="A cute little music player.">
+
+  <!-- Mobile viewport optimized: h5bp.com/viewport -->
+  <meta name="viewport" content="width=device-width">
+
+  <!-- Place favicon.ico and apple-touch-icon.png in the root directory: mathiasbynens.be/notes/touch-icons -->
+  <link rel="shortcut icon" href="favicon.ico" />
+
+  <link rel="stylesheet" href="css/jquery-ui.css">
+  <link rel="stylesheet" href="css/jquery.alerts.css">
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- More ideas for your <head> here: h5bp.com/d/head-Tips -->
+
+  <!-- All JavaScript at the bottom, except this Modernizr build.
+       Modernizr enables HTML5 elements & feature detects for optimal performance.
+       Create your own custom Modernizr build: www.modernizr.com/download/ -->
+  <script src="js/libs/modernizr-2.5.3.min.js"></script>
+</head>
+<body>
+  <!-- Prompt IE 6 users to install Chrome Frame. Remove this if you support IE 6.
+       chromium.org/developers/how-tos/chrome-frame-getting-started -->
+  <!--[if lt IE 7]><p class=chromeframe>Your browser is <em>ancient!</em> <a href="http://browsehappy.com/">Upgrade to a different browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a> to experience this site.</p><![endif]-->
+  <header>
+      &#160;
+  </header>
+  <div id="content" role="main">
+      <div class="clearfix"></div>
+      <article id="player">
+          <header>
+              <h1>Playlist</h1>
+          </header>
+          <section id="audio">
+              <div id="currentTime"></div>
+              <div id="seeker">
+                  <span id="handle" class="ui-slider-handle" title="Drag to seek"></span>
+              </div>
+              <div id="remainingTime"></div>
+          </section>
+          <div class="myMarquee">
+          	<div id="songScroller" class="scroller">
+          		<div>No track playing.</div>
+          		<div>No track playing.</div>
+          	</div>
+          </div>
+          <aside>
+              <div id="controls">
+                  <button id="previous">Previous</button>
+                  <button id="play">Play</button>
+                  <button id="stop">Stop</button>
+                  <button id="next">Next</button>
+                  <input type="checkbox" id="shuffle" /><label id="shufflelabel"  for="shuffle">Turn Shuffle On</label>
+                  <input type="checkbox" id="repeat" checked="checked" /><label id="repeatlabel"  for="repeat">Turn Repeat Off</label>
+              </div>
+          </aside>
+          <section id="playlistSection">
+              <div id="playlist">
+                  <ul id="playlistHead">
+                      <li>Track</li>
+                      <li>Album</li>
+                      <li>Artist</li>
+                  </ul>
+                  <!-- templated playlist items would follow -->
+              </div>
+              <button id="clearPlaylistButton">Clear Playlist</button>
+          </section>
+      </article>
+      <aside id="library">
+          <header>
+              <h1>Library</h1>
+              <button id="addToLibraryButton">Add New Track to Library</button>
+          </header>
+          <div id="albums">
+              <!-- templated albums would follow -->
+          </div>
+      </aside>
+      <div class="clearfix"></div>
+      <aside id="unsupportedBrowser">
+          Your browser does not support the HTML5 audio tag or the audio formats used in this page.
+      </aside>
+  </div>
+  <footer>
+      <small>Made with <a href="http://html5boilerplate.com/">HTML5 Boilerplate</a>,
+          <a href="http://www.jetbrains.com/webstorm/">WebStorm</a>,
+          <a href="http://jquery.com/">jQuery</a> (<a href="http://jqueryui.com/">&amp; UI</a>),
+          <a href="http://api.jquery.com/category/plugins/templates/">Templates plugin</a>,
+          <a href="http://www.abeautifulsite.net/blog/2008/12/jquery-alert-dialogs/">Alert Dialogs plugin</a>,
+          <a href="http://gradients.glrzad.com/">CSS3 Gradient Generator</a>,
+          <a href="http://neutroncreations.com/blog/building-a-custom-html5-audio-player-with-jquery/">'The Particle Lab' blog</a> etc.</small>
+  </footer>
+  
+  <div id="addToLibraryDialog">
+      <form>
+          <fieldset>
+              <small>Track and URLs are required</small>
+              <label for="track">Track</label>
+              <input type="text" name="track" id="track" class="text ui-widget-content ui-corner-all"
+                      placeholder="Title of the Track (egs. Symphony 04)"/>
+              <label for="artist">Artist</label>
+              <input type="text" name="artist" id="artist" class="text ui-widget-content ui-corner-all"
+                      placeholder="Artist for this Track (egs. Ludwig van Beethoven)"/>
+              <label for="trackLocationOgg">URL to .ogg file</label>
+              <input type="text" name="trackLocationOgg" id="trackLocationOgg" class="text ui-widget-content ui-corner-all"
+                      placeholder="http://upload.wikimedia.org/wikipedia/commons/8/8c/Ludwig_van_Beethoven_-_symphony_no._4_in_b_flat_major%2C_op._60_-_ii._adagio.ogg"/>
+              <label for="trackLocationMp3">URL to .mp3 file</label>
+              <input type="text" name="trackLocationMp3" id="trackLocationMp3" class="text ui-widget-content ui-corner-all"
+                      placeholder="http://someplace.that.has.mp3/thistrack.mp3"/>
+              <small>Track would be added to an album titled 'Miscellaneous'</small>
+          </fieldset>
+      </form>
+  </div>
+
+
+  <script id="audioTemplate" type="text/x-jquery-tmpl">
+      <audio>
+          <source src="${trackLocationOgg}" type="audio/ogg">
+          <source src="${trackLocationMp3}" type="audio/mp3">
+          Your browser does not support this format of audio !
+      </audio>
+  </script>
+
+  <script id="albumTemplate" type="text/x-jquery-tmpl">
+      <section class="albumSection">
+          <header class="albumHeader">
+              <h4 class="albumTitle" data-album-id="${albumId}">${albumTitle}</h4>
+              <button class="addAlbumButton">Add Album to Playlist</button>
+              <div class="clearfix"></div>
+          </header>
+          <section class="songs">
+              <ul>
+                  {{each tracks}}
+                  {{tmpl($value) "albumListingTemplate"}}
+                  {{/each}}
+              </ul>
+          </section>
+      </section>
+  </script>
+
+  <script id="albumListingTemplate" type="text/x-jquery-tmpl">
+      <li data-track-id="${trackId}" data-track-location-ogg="${trackLocationOgg}"
+          data-track-location-mp3="${trackLocationMp3}">
+          ${trackTitle} - ${artist}
+          <button class="addSongButton">Add Track to Playlist</button>
+      </li>
+  </script>
+
+  <script id="playlistitemtemplate" type="text/x-jquery-tmpl">
+      <ul class="playlistItem" title="Double click to start playing"
+          data-album-id="${albumId}" data-track-id="${trackId}"
+          data-track-location-ogg="${trackLocationOgg}"
+          data-track-location-mp3="${trackLocationMp3}"
+          onclick="function(){};return false;"
+          ondblclick="function(){};return false;">
+          <li class="trackTitle">${trackTitle}</li>
+          <li class="albumTitle">${albumTitle}</li>
+          <li class="artist">${artist}</li>
+      </ul>
+  </script>
+
+  <!-- JavaScript at the bottom for fast page loading -->
+
+  <!-- Grab Google CDN's jQuery, with a protocol relative URL; fall back to local if offline -->
+  <!--<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>-->
+  <script>window.jQuery || document.write('<script src="js/libs/jquery-1.7.1.min.js"><\/script>')</script>
+
+  <script src="js/libs/jquery-ui-1.8.18.min.js"></script>
+  <script src="js/libs/jquery.tmpl.min.js"></script>
+  <script src="js/libs/jquery.alerts.js"></script>
+
+  <!-- scripts concatenated and minified via build script -->
+  <script src="js/plugins.js"></script>
+  <script src="js/script.js"></script>
+  <!-- end scripts -->
+
+  <!-- Asynchronous Google Analytics snippet. Change UA-XXXXX-X to be your site's ID.
+       mathiasbynens.be/notes/async-analytics-snippet -->
+  <script>
+    var _gaq=[['_setAccount','UA-XXXXX-X'],['_trackPageview']];
+    (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+    g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+    s.parentNode.insertBefore(g,s)}(document,'script'));
+  </script>
+
+</body>
+</html>
