@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Numerous always-ignore extensions
 *.diff
 *.err
@@ -42,7 +41,5 @@ publish
 # build script local files
 build/buildinfo.properties
 build/config/buildinfo.properties
-=======
 .idea
 
->>>>>>> a5391d2226c7233a8c289fa7c9e5c8cb4e01dbbd
